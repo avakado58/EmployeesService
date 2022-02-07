@@ -81,7 +81,13 @@ namespace EmployeesService.Models
 
         public int Delete(int id)
         {
-            throw new NotImplementedException();
+            using(IDbConnection db = new SqlConnection(_connectionString))
+            {
+                string sqlQuery = $"DELETE FROM Employee WHERE Employee.Id = {id} ";
+
+                int? deliteResalt = db.Query<int>(sqlQuery).FirstOrDefault();
+                return deliteResalt.Value;
+            }
         }
 
         public void Update(Employee employee)

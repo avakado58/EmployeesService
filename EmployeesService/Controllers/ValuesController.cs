@@ -37,6 +37,16 @@ namespace EmployeesService.Controllers
             ;
             return new JsonResult(_repository.Create(employee));
         }
+        [HttpDelete("{id:int}")]
+        public IActionResult Delete(int id)
+        {
+            var result = _repository.Delete(id);
+            if(result == 0)
+                return NotFound(); 
+           
+            
+            return new JsonResult(new { result });
+        }
         
 
     }
