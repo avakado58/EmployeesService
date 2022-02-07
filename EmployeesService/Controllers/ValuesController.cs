@@ -16,11 +16,19 @@ namespace EmployeesService.Controllers
         {
             _repository = repository;
         }
-        [HttpGet("{CompanyId?}")]
+
+        [HttpGet("{CompanyId:int}")]
         public IActionResult Get(int CompanyId)
         {
             return new JsonResult(_repository.Get(CompanyId));
         }
+
+        [HttpGet("{departmentName}")]
+        public IActionResult Get(string departmentName)
+        {
+            return new JsonResult(_repository.Get(departmentName));
+        }
+
         [HttpPost]
         public IActionResult Post(Employee employee)
         {

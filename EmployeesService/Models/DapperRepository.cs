@@ -62,7 +62,21 @@ namespace EmployeesService.Models
 
         public List<Employee> Get(string departmentName)
         {
-            throw new NotImplementedException();
+            using (IDbConnection db = new SqlConnection(_connectionString))
+            {
+                string sqlQuery = "SELECT * FROM Employee " +
+                    "Join Department ON Employee.Department = Department.Name " +
+                    "JOIN Passport ON Employee.Id = Passport.Id " +
+                    $"WHERE Employee.Department LIKE N'{departmentName}'";
+                var employee = db.Query<Employee, Department, Pasport, Employee>(sqlQuery, (employee, department, pasport) =>
+                {
+                    employee.Department = department;
+                    employee.Pasport = pasport;
+                    return employee;
+                }, splitOn: "Department,Id").ToList();
+
+                return employee;
+            }
         }
 
         public int Delete(int id)
