@@ -20,13 +20,20 @@ namespace EmployeesService.Controllers
         [HttpGet("{CompanyId:int}")]
         public IActionResult Get(int CompanyId)
         {
-            return new JsonResult(_repository.Get(CompanyId));
+            var employees = _repository.Get(CompanyId);
+            if(employees.Count == 0)
+                return NotFound();
+            return new JsonResult(employees);
         }
 
         [HttpGet("{departmentName}")]
         public IActionResult Get(string departmentName)
         {
-            return new JsonResult(_repository.Get(departmentName));
+            var employees = _repository.Get(departmentName);
+
+            if (employees.Count == 0)
+                return NotFound();
+            return new JsonResult(employees);
         }
 
         [HttpPost]
@@ -37,6 +44,7 @@ namespace EmployeesService.Controllers
             ;
             return new JsonResult(_repository.Create(employee));
         }
+
         [HttpDelete("{id:int}")]
         public IActionResult Delete(int id)
         {
@@ -44,8 +52,46 @@ namespace EmployeesService.Controllers
             if(result == 0)
                 return NotFound(); 
            
-            
             return new JsonResult(new { result });
+        }
+
+        [HttpPatch("{id:int}")]
+        public IActionResult Patch(int id, Employee employee)
+        {
+            if (employee == null)
+                return BadRequest();
+
+            Employee employeeFromDB = _repository.GetFerstOrDefault(id);
+            if (employeeFromDB==null)
+                return NotFound();
+            //Проверяем, имелось ли поле с определённым именем в json запросе, если да, то устанавливаем значение из запроса, иначе не меняем
+            employee.Name = employee.IsFieldPresent(nameof(employee.Name)) ? employee.Name : employeeFromDB.Name;
+            employee.Surname = employee.IsFieldPresent(nameof(employee.Surname)) ? employee.Surname : employeeFromDB.Surname;
+            employee.Phone = employee.IsFieldPresent(nameof(employee.Phone)) ? employee.Phone : employeeFromDB.Phone;
+            employee.CompanyId = employee.IsFieldPresent(nameof(employee.CompanyId)) ? employee.CompanyId : employeeFromDB.CompanyId;
+            
+            if(employee.Department!=null)
+            {
+                employee.Department.Name = employee.Department.IsFieldPresent(nameof(employee.Department.Name)) ? employee.Department.Name : employeeFromDB.Department.Name;
+                employee.Department.Phone = employee.Department.IsFieldPresent(nameof(employee.Department.Phone)) ? employee.Department.Phone : employeeFromDB.Department.Phone;
+            }
+            else
+            {
+                employee.Department = employeeFromDB.Department;
+            }
+
+            if(employee.Pasport!=null)
+            {
+                employee.Pasport.Type = employee.Pasport.IsFieldPresent(nameof(employee.Pasport.Type)) ? employee.Pasport.Type : employeeFromDB.Pasport.Type;
+                employee.Pasport.Number = employee.Pasport.IsFieldPresent(nameof(employee.Pasport.Number)) ? employee.Pasport.Number : employeeFromDB.Pasport.Number;
+            }
+            else
+            {
+                employee.Pasport = employeeFromDB.Pasport;
+            }
+            
+            _repository.Update(id, employee);
+            return Ok();
         }
         
 

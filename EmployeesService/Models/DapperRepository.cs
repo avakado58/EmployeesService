@@ -41,12 +41,32 @@ namespace EmployeesService.Models
             
         }       
 
+
+        public Employee GetFerstOrDefault(int id)
+        {
+            using (IDbConnection db = new SqlConnection(_connectionString))
+            {
+                string sqlQuery = "SELECT * FROM Employee " +
+                    "JOIN Department ON Employee.Department = Department.Name " +
+                    "JOIN Passport ON Employee.Id = Passport.Id " +
+                    $"WHERE Employee.Id = {id}";
+                var employee = db.Query <Employee, Department, Pasport, Employee>(sqlQuery, (employee, department, pasport) =>
+                {
+                    employee.Department = department;
+                    employee.Pasport = pasport;
+                    return employee;
+                }, splitOn: "Department,Id");
+
+                return employee.FirstOrDefault();
+            }
+        }
+
         public List<Employee> Get(int companyId)
         {
             using (IDbConnection db = new SqlConnection(_connectionString))
             {
                 string sqlQuery = "SELECT * FROM Employee " +
-                    "Join Department ON Employee.Department = Department.Name " +
+                    "JOIN Department ON Employee.Department = Department.Name " +
                     "JOIN Passport ON Employee.Id = Passport.Id " +
                     $"WHERE Employee.CompanyId = {companyId}";
                 var employee = db.Query<Employee, Department,Pasport, Employee>(sqlQuery, (employee, department, pasport) => 
@@ -65,7 +85,7 @@ namespace EmployeesService.Models
             using (IDbConnection db = new SqlConnection(_connectionString))
             {
                 string sqlQuery = "SELECT * FROM Employee " +
-                    "Join Department ON Employee.Department = Department.Name " +
+                    "JOIN Department ON Employee.Department = Department.Name " +
                     "JOIN Passport ON Employee.Id = Passport.Id " +
                     $"WHERE Employee.Department LIKE N'{departmentName}'";
                 var employee = db.Query<Employee, Department, Pasport, Employee>(sqlQuery, (employee, department, pasport) =>
@@ -90,9 +110,17 @@ namespace EmployeesService.Models
             }
         }
 
-        public void Update(Employee employee)
+        public void Update(int id, Employee employee)
         {
-            throw new NotImplementedException();
+           using(IDbConnection db = new SqlConnection(_connectionString))
+            {
+                string sqlQuery = $"UPDATE Employee SET Name =N'{employee.Name}', Surname =N'{employee.Surname}', Phone =N'{employee.Phone}', " +
+                    $"CompanyId = N'{employee.CompanyId}', Department = N'{employee.Department.Name}' " +
+                    $"WHERE Employee.Id = {id} " +
+                    $"UPDATE Passport SET Type = N'{employee.Pasport.Type}', Number = N'{employee.Pasport.Number}' " +
+                    $"WHERE Passport.Id = {id}";
+                db.Execute(sqlQuery);
+            }
         }
     }
 }

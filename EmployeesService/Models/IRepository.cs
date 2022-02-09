@@ -10,8 +10,9 @@ namespace EmployeesService.Models
     {
         int Create(Employee employee);
         int Delete(int id);
+        Employee GetFerstOrDefault(int id);
         List<Employee> Get(int CompanyId);
         List<Employee> Get(string DepartmentName);
-        void Update(Employee employee);
+        void Update(int id, Employee employee);
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EmployeesService.Models
 {
-    public class Department
+    public class Department:PatchDtoBase
     {
         public string Name { get; set; }
         public string Phone { get; set; }

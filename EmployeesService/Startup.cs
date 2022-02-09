@@ -25,7 +25,12 @@ namespace EmployeesService
         {
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
             services.AddScoped<IRepository, DapperRepository>(provider => new DapperRepository(connectionString));
-            services.AddControllers();
+            services
+                .AddControllers()
+                .AddNewtonsoftJson(options=>
+                {
+                    options.SerializerSettings.ContractResolver = new PatchRequestContractResolver();
+                });
         }
 
 
